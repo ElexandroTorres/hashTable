@@ -46,8 +46,8 @@ class Hashtbl {
 		using Entry = HashEntry<KeyType, DataType>; //
 
 		Hashtbl(size_t tbl_size_ = DEFAULT_SIZE) {
-			m_data_table = new sc::list<Entry>[DEFAULT_SIZE]; // Cria uma tablea de listas encadeadas.
 			m_size = tbl_size_;
+			m_data_table = new sc::list<Entry>[m_size]; // Cria uma tablea de listas encadeadas.
 			m_count = 0;
 		}
 
@@ -70,7 +70,12 @@ class Hashtbl {
 		Hashtbl &operator=(std::initializer_list<Entry> ilist) {
 
 		}
-
+		/*!
+		 * Insere um novo elemento na tabela.
+		 * @param k_ Chave do novo elemento.
+		 * @param d_ Dado associado a chave.
+		 * @return true caso seja possivel inserir o novo elemento e false caso contrario.
+		*/
 		bool insert(const KeyType &k_, const DataType &d_) {
 			std::hash<KeyType> hashFunc;
 			std::equal_to<KeyType> equalFunc;
@@ -91,6 +96,8 @@ class Hashtbl {
 
 			m_data_table[end].push_back(new_entry);
 
+			return true; // Operação realizada com sucesso.
+
 
 			std::cout << "valor função hash: " << hashFunc(k_) << "\n";
 			std::cout << "Valor da chave: " << end << "\n"; 
@@ -107,13 +114,31 @@ class Hashtbl {
 		void clear(void) {
 
 		}
-
+		/*!
+		 * Verifica se a tabela está vazia.
+		 * @return true Caso esteja vazia e false caso contrario.
+		*/
 		bool empty(void) const {
 			return m_size == 0;
 		}
-
+		/*!
+		 * Retorna a quantidade de elementos presentes na tabela.
+		 * @return Quantidade de elementos na tabela.
+		*/
 		size_t size(void) const {
-			return m_size;
+			return m_count;
+		}
+		/*!
+		 * Retorna a quantidade de elementos presentes na lista de colisão do elemento da chave dada.
+		 * @param k Chave para um determinado elemento na tabela.
+		 * @return Quantidade de elementos presentes na lista de colisão em que k_ pertence.
+		*/
+		size_t count(const KeyType &k_) const {
+			std::hash<KeyType> hashFunc;
+			std::equal_to<KeyType> equalFunc;
+			auto end(hashFunc(k_) % m_size); //Representa o endereço.
+			return m_data_table[end].size();
+
 		}
 
 		DataType &at(const KeyType &k_) {
@@ -137,13 +162,11 @@ class Hashtbl {
 			}
 
 		}
-
-		size_t count(const KeyType &k_) const {
-
-		}
-
+		/*!
+		 * Sobrecarga do operador << para permitir a impressão da tabela de maneira pratica.
+		*/
 		friend std::ostream &operator<<(std::ostream &out, const Hashtbl &tbl) {
-			for(int i = 0; i < 10; i++) {
+			for(int i = 0; i < tbl.m_size; i++) {
 				auto it = tbl.m_data_table[i].begin();	
 				out << i << ": ";
 				while(it != tbl.m_data_table[i].end()) {
@@ -158,13 +181,13 @@ class Hashtbl {
 
 	private:
 		void rerash(); // muda o tamanho da tablea caso o fator seja maior que 1.
-		unsigned int m_size; //<! Tamanho da tabela.
+		unsigned int m_size; //<! Armazena o tamanho da tabela..
 		unsigned int m_count; //<! Quantidade de elementos na tabela.
 
 		sc::list<Entry> *m_data_table; //<! Poneiro para tabela de listas de Entry.
 
 
-		static const short DEFAULT_SIZE = 11;
+		static const short DEFAULT_SIZE = 11; // Tamanho padrão da tabela.
 };
 
 int main() {
@@ -198,6 +221,9 @@ int main() {
 
     std::cout << "Testes impressão tabela: \n";
     std::cout << htable << std::endl;
+
+    std::cout << "Testes count: \n";
+    std::cout << htable.count('b') << "\n";
 
 
 
