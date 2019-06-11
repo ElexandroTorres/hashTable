@@ -40,27 +40,38 @@ class HashEntry {
 
 
 
-template<typename KeyType, typename DataType>
+template<typename KeyType, typename DataType, typename KeyHash = std::hash<KeyType>, typename KeyEqual = std::equal_to<KeyType>>
 class Hashtbl {
 	public:
-		using Entry = HashEntry<KeyType, DataType>; //
+		// Definições de tipo:
+		using Entry = HashEntry<KeyType, DataType>;
+		// Construtores:
 
+		/*!
+		 * Construtor padrão. Caso não informado o tamanho a tabela será iniciada com o tamanho "DEFAULT_SIZE".
+		*/
 		Hashtbl(size_t tbl_size_ = DEFAULT_SIZE) {
-			m_size = tbl_size_;
-			m_data_table = new sc::list<Entry>[m_size]; // Cria uma tablea de listas encadeadas.
-			m_count = 0;
+			m_Tablesize = tbl_size_;
+			m_count = 0; // Quantidade inicial de elementos é zero.
+			m_data_table = new std::forward_list<Entry>[m_Tablesize]; // Cria uma tablea de listas encadeadas.
 		}
-
-		virtual ~Hashtbl() {
-			delete[] m_data_table;
-		}
-
+		/*!
+		 * Construtor copia.
+		*/
 		Hashtbl(const Hashtbl &other) {
 
 		}
-
+		/*!
+		 * Construtor a partir de outra lista.
+		*/
 		Hashtbl(std::initializer_list<Entry> ilist) {
 
+		}
+		/*!
+		 * Destrutor.
+		*/
+		virtual ~Hashtbl() {
+			delete[] m_data_table;
 		}
 
 		Hashtbl &operator=(const Hashtbl &other) {
@@ -77,37 +88,71 @@ class Hashtbl {
 		 * @return true caso seja possivel inserir o novo elemento e false caso contrario.
 		*/
 		bool insert(const KeyType &k_, const DataType &d_) {
-			std::hash<KeyType> hashFunc;
-			std::equal_to<KeyType> equalFunc;
-			Entry new_entry(k_, d_);
+			
+			Entry new_entry(k_, d_); // Cria um novo item de tabela com os valores passados.
 
-			auto end(hashFunc(k_) % m_size); //Representa o endereço.
-
-			auto it = m_data_table[end].begin(); 
-
-			//caso não tenham itens na lista.
-			while(it != m_data_table[end].end()) {
-				// Verificar se ja existe algum item com a mesma chave, caso sim não sera possivel completar a operação.
-				if(new_entry.m_key == (*it).m_key) {
+			auto address(hashFunc(k_) % m_Tablesize); // Calcula o endereço a qual o valor será adicionado.
+			// Varrer toda a lista para verificar se há algum item com a mesma chave.
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				// Caso encontre algum item com a mesma chave não será possivel fazer a inserção.
+				if(new_entry.m_key == it->m_key) {
 					return false;
 				}
-				it++;
 			}
+			// Caso seja a primeira vez de um item com essa chave, inserir ele na tabela.
+			m_data_table[address].push_front(new_entry);
 
-			m_data_table[end].push_back(new_entry);
+			return true;
 
-			return true; // Operação realizada com sucesso.
-
-
-			std::cout << "valor função hash: " << hashFunc(k_) << "\n";
-			std::cout << "Valor da chave: " << end << "\n"; 
 		}
 
 		bool erase(const KeyType &k_) {
 			
-		}
+			auto address(hashFunc(k_) % m_Tablesize); // Calcula o endereço a qual o valor será removido.
+			// Varrer toda a lista para verificar se há algum item com a mesma chave.
+			auto it = m_data_table[address].begin();
+			auto itPrev = it; // Posição anterior ao it para nos permitir fazer a inserção.
+			// Caso especial, para caso o item removido seja o primeiro elemento.
+			if(k_ == it->m_key) {
+				m_data_table[address].erase_after(m_data_table[address].before_begin());
+				--m_count; // Diminuí a quantidade de elementos presentes na tabela.
+				return true;
+			}
+			it++; // Avança o iterator.
+			// Verificar o resto da lista.
+			while(it != m_data_table[address].end()) {
+				// Caso encontre um item com a mesma chave, iremos remove-lo.
+				if(k_ == it->m_key) {
+					m_data_table[address].erase_after(itPrev); // Remove o elemento após o itPrev, ou seja, o que achamos a igualdade entre as chaves.
+					--m_count;					
+					return true;
+				}
+				it++;
+				itPrev++; // ItPrev sempre vai está uma posição antes do it para assim permitir a inserção.
+			}
 
+			return false;
+
+		}
+		/*!
+		 * Verifica se uma chave e um dado estão associados na tabela.
+		 * @param k_ Chave para o elemento.
+		 * @param d_ Dado do elemento.
+		 * @return true caso estejam associados e false caso contrario.
+		*/
 		bool retrieve(const KeyType &k_, DataType &d_) const {
+			auto address(hashFunck(k_) % m_Tablesize);
+
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				if(k_ == it->m_key) {
+					if(d_ == it->m_data) {
+						return true;
+					}
+					return false;
+				}
+			}
+
+			return false;
 
 		}
 
@@ -119,7 +164,7 @@ class Hashtbl {
 		 * @return true Caso esteja vazia e false caso contrario.
 		*/
 		bool empty(void) const {
-			return m_size == 0;
+			return m_Tablesize == 0;
 		}
 		/*!
 		 * Retorna a quantidade de elementos presentes na tabela.
@@ -134,57 +179,72 @@ class Hashtbl {
 		 * @return Quantidade de elementos presentes na lista de colisão em que k_ pertence.
 		*/
 		size_t count(const KeyType &k_) const {
-			std::hash<KeyType> hashFunc;
-			std::equal_to<KeyType> equalFunc;
-			auto end(hashFunc(k_) % m_size); //Representa o endereço.
-			return m_data_table[end].size();
+
+			auto address(hashFunc(k_) % m_Tablesize); //Representa o endereço.
+			unsigned int cont = 0; // Contador para verificar quantos elementos existem no mesmo "ramo" da chave dada.
+			// Varrer toda a lista até o seu final.
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				++cont;
+			}
+			return cont;
 
 		}
 
 		DataType &at(const KeyType &k_) {
+			auto address(hashFunc(k_) % m_Tablesize);
 
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				if(k_ == it->m_key) {
+					return it->m_data;
+				}
+			}
+			// Caso a chave não seja encontrada é lançada uma exceção.
+			throw std::out_of_range("Key is not in table");
 		}
 
 		DataType &operator[](const KeyType &k_) {
-			std::hash<KeyType> hashFunc;
-			std::equal_to<KeyType> equalFunc;
+			auto address(hashFunc(k_) % m_Tablesize);
 
-			auto end(hashFunc(k_) % m_size);
-
-			auto it = m_data_table[end].begin();
-
-			while(it != m_data_table[end].end()) {
-				//std::cout << "ENTRO AKI!!\n";
-				if(k_ == (*it).m_key) {
-					return (*it).m_data;
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				if(k_ == it->m_key) {
+					return it->m_data;
 				}
-				it++;
 			}
 
 		}
+		/* Caso seja necessario.
+		const DataType &operator[](const KeyType &k_) const {
+			auto address(hashFunc(k_) % m_Tablesize);
+
+			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
+				if(k_ == it->m_key) {
+					return it->m_data;
+				}
+			}
+		}
+		*/
 		/*!
 		 * Sobrecarga do operador << para permitir a impressão da tabela de maneira pratica.
 		*/
 		friend std::ostream &operator<<(std::ostream &out, const Hashtbl &tbl) {
-			for(int i = 0; i < tbl.m_size; i++) {
-				auto it = tbl.m_data_table[i].begin();	
+			for(auto i = 0u; i < tbl.m_Tablesize; i++) {
 				out << i << ": ";
-				while(it != tbl.m_data_table[i].end()) {
-					out << (*it).m_data << " ";
-					it++;
+				for(auto it = tbl.m_data_table[i].begin(); it != tbl.m_data_table[i].end(); it++) {
+					out << it->m_data << " ";
 				}
-				out << "\n";
+				out << std::endl;
 			}
-			
 			return out;
 		}
 
 	private:
+		KeyHash hashFunc;
+		KeyEqual equalFunc;
 		void rerash(); // muda o tamanho da tablea caso o fator seja maior que 1.
-		unsigned int m_size; //<! Armazena o tamanho da tabela..
+		unsigned int m_Tablesize; //<! Armazena o tamanho da tabela..
 		unsigned int m_count; //<! Quantidade de elementos na tabela.
 
-		sc::list<Entry> *m_data_table; //<! Poneiro para tabela de listas de Entry.
+		std::forward_list<Entry> *m_data_table; //<! Poneiro para tabela de listas de Entry.
 
 
 		static const short DEFAULT_SIZE = 11; // Tamanho padrão da tabela.
@@ -224,6 +284,14 @@ int main() {
 
     std::cout << "Testes count: \n";
     std::cout << htable.count('b') << "\n";
+
+    htable['c'] = 24;
+    //htable.erase('a');
+    htable.erase('c');
+    //std::cout << "htable['c']: " << htable['c'] << "\n";
+
+    std::cout << "Testes impressão tabela: \n";
+    std::cout << htable << std::endl;
 
 
 
