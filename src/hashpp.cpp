@@ -51,21 +51,26 @@ class Hashtbl {
 		 * Construtor padrão. Caso não informado o tamanho a tabela será iniciada com o tamanho "DEFAULT_SIZE".
 		*/
 		Hashtbl(size_t tbl_size_ = DEFAULT_SIZE) {
-			m_Tablesize = tbl_size_;
+			m_tableSize = tbl_size_;
 			m_count = 0; // Quantidade inicial de elementos é zero.
-			m_data_table = new std::forward_list<Entry>[m_Tablesize]; // Cria uma tablea de listas encadeadas.
+			m_data_table = new std::forward_list<Entry>[m_tableSize]; // Cria uma tablea de listas encadeadas.
 		}
 		/*!
 		 * Construtor copia.
 		*/
 		Hashtbl(const Hashtbl &other) {
-
+			*this = other;
 		}
 		/*!
 		 * Construtor a partir de outra lista.
 		*/
 		Hashtbl(std::initializer_list<Entry> ilist) {
-
+			auto it = ilist.begin();
+			m_tableSize = ilist.size(); //verificar o proximo primo depois.
+			while(it != ilist.end()) {
+				insert(*it);
+				it++;
+			}
 		}
 		/*!
 		 * Destrutor.
@@ -75,7 +80,17 @@ class Hashtbl {
 		}
 
 		Hashtbl &operator=(const Hashtbl &other) {
-
+			//antes limpar a lista caso ela tenha elementos.
+			if(this->m_count > 0) {
+				//limpar
+			}
+			m_tableSize = other.m_tableSize;
+			m_count = other.m_count;
+			m_data_table = new std::forward_list<Entry>[m_tableSize]; // Cria uma tablea de listas encadeadas.
+			// Copiar todas as listas para a nova tabela.
+			for(auto i = 0u; i < m_tableSize; i++) {
+				m_data_table[i] = other.m_data_table[i];
+			}
 		}
 
 		Hashtbl &operator=(std::initializer_list<Entry> ilist) {
@@ -91,7 +106,7 @@ class Hashtbl {
 			
 			Entry new_entry(k_, d_); // Cria um novo item de tabela com os valores passados.
 
-			auto address(hashFunc(k_) % m_Tablesize); // Calcula o endereço a qual o valor será adicionado.
+			auto address(hashFunc(k_) % m_tableSize); // Calcula o endereço a qual o valor será adicionado.
 			// Varrer toda a lista para verificar se há algum item com a mesma chave.
 			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
 				// Caso encontre algum item com a mesma chave não será possivel fazer a inserção.
@@ -108,7 +123,7 @@ class Hashtbl {
 
 		bool erase(const KeyType &k_) {
 			
-			auto address(hashFunc(k_) % m_Tablesize); // Calcula o endereço a qual o valor será removido.
+			auto address(hashFunc(k_) % m_tableSize); // Calcula o endereço a qual o valor será removido.
 			// Varrer toda a lista para verificar se há algum item com a mesma chave.
 			auto it = m_data_table[address].begin();
 			auto itPrev = it; // Posição anterior ao it para nos permitir fazer a inserção.
@@ -141,7 +156,7 @@ class Hashtbl {
 		 * @return true caso estejam associados e false caso contrario.
 		*/
 		bool retrieve(const KeyType &k_, DataType &d_) const {
-			auto address(hashFunck(k_) % m_Tablesize);
+			auto address(hashFunck(k_) % m_tableSize);
 
 			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
 				if(k_ == it->m_key) {
@@ -157,14 +172,18 @@ class Hashtbl {
 		}
 
 		void clear(void) {
-
+			// Iremos limpar todas as listas. Porem a tabela ainda continuará com o mesmo tamanho.
+			for(auto i = 0u; i < m_tableSize; i++) {
+				m_data_table[i].clear();
+			}
+			m_count = 0;
 		}
 		/*!
 		 * Verifica se a tabela está vazia.
 		 * @return true Caso esteja vazia e false caso contrario.
 		*/
 		bool empty(void) const {
-			return m_Tablesize == 0;
+			return m_tableSize == 0;
 		}
 		/*!
 		 * Retorna a quantidade de elementos presentes na tabela.
@@ -180,7 +199,7 @@ class Hashtbl {
 		*/
 		size_t count(const KeyType &k_) const {
 
-			auto address(hashFunc(k_) % m_Tablesize); //Representa o endereço.
+			auto address(hashFunc(k_) % m_tableSize); //Representa o endereço.
 			unsigned int cont = 0; // Contador para verificar quantos elementos existem no mesmo "ramo" da chave dada.
 			// Varrer toda a lista até o seu final.
 			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
@@ -191,7 +210,7 @@ class Hashtbl {
 		}
 
 		DataType &at(const KeyType &k_) {
-			auto address(hashFunc(k_) % m_Tablesize);
+			auto address(hashFunc(k_) % m_tableSize);
 
 			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
 				if(k_ == it->m_key) {
@@ -203,7 +222,7 @@ class Hashtbl {
 		}
 
 		DataType &operator[](const KeyType &k_) {
-			auto address(hashFunc(k_) % m_Tablesize);
+			auto address(hashFunc(k_) % m_tableSize);
 
 			for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
 				if(k_ == it->m_key) {
@@ -227,7 +246,7 @@ class Hashtbl {
 		 * Sobrecarga do operador << para permitir a impressão da tabela de maneira pratica.
 		*/
 		friend std::ostream &operator<<(std::ostream &out, const Hashtbl &tbl) {
-			for(auto i = 0u; i < tbl.m_Tablesize; i++) {
+			for(auto i = 0u; i < tbl.m_tableSize; i++) {
 				out << i << ": ";
 				for(auto it = tbl.m_data_table[i].begin(); it != tbl.m_data_table[i].end(); it++) {
 					out << it->m_data << " ";
@@ -241,7 +260,7 @@ class Hashtbl {
 		KeyHash hashFunc;
 		KeyEqual equalFunc;
 		void rerash(); // muda o tamanho da tablea caso o fator seja maior que 1.
-		unsigned int m_Tablesize; //<! Armazena o tamanho da tabela..
+		unsigned int m_tableSize; //<! Armazena o tamanho da tabela..
 		unsigned int m_count; //<! Quantidade de elementos na tabela.
 
 		std::forward_list<Entry> *m_data_table; //<! Poneiro para tabela de listas de Entry.

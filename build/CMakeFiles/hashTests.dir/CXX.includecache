@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/elexandro/Documentos/hashTable/include/hashtbl.h
+forward_list
+-
+
+/home/elexandro/Documentos/hashTable/src/hashTests.cpp
+iterator
+-
+functional
+-
+algorithm
+-
+array
+-
+map
+-
+gtest/gtest.h
+/home/elexandro/Documentos/hashTable/src/gtest/gtest.h
+../include/hashtbl.h
+/home/elexandro/Documentos/hashTable/include/hashtbl.h
+

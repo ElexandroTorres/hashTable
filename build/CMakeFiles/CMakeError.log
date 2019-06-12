@@ -1,0 +1,51 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_af907/fast"
+/usr/bin/make -f CMakeFiles/cmTC_af907.dir/build.make CMakeFiles/cmTC_af907.dir/build
+make[1]: Entering directory '/home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_af907.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -Wall -g    -o CMakeFiles/cmTC_af907.dir/CheckSymbolExists.cxx.o -c /home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_af907
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_af907.dir/link.txt --verbose=1
+/usr/bin/c++   -Wall -g     CMakeFiles/cmTC_af907.dir/CheckSymbolExists.cxx.o  -o cmTC_af907 
+/usr/bin/ld: CMakeFiles/cmTC_af907.dir/CheckSymbolExists.cxx.o: na função "main":
+/home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8: referência não definida para "pthread_create"
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_af907.dir/build.make:87: cmTC_af907] Error 1
+make[1]: Leaving directory '/home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_af907/fast] Error 2
+
+File /home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a95c8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a95c8.dir/build.make CMakeFiles/cmTC_a95c8.dir/build
+make[1]: Entering directory '/home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a95c8.dir/CheckFunctionExists.cxx.o
+/usr/bin/c++    -Wall -g -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_a95c8.dir/CheckFunctionExists.cxx.o -c /home/elexandro/Documentos/hashTable/build/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
+Linking CXX executable cmTC_a95c8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a95c8.dir/link.txt --verbose=1
+/usr/bin/c++   -Wall -g -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_a95c8.dir/CheckFunctionExists.cxx.o  -o cmTC_a95c8 -lpthreads 
+/usr/bin/ld: não foi possível localizar -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_a95c8.dir/build.make:87: cmTC_a95c8] Error 1
+make[1]: Leaving directory '/home/elexandro/Documentos/hashTable/build/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_a95c8/fast] Error 2
+
+
