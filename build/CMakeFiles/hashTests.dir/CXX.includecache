@@ -9,6 +9,8 @@
 /home/elexandro/Documentos/hashTable/include/hashtbl.h
 forward_list
 -
+cmath
+-
 
 /home/elexandro/Documentos/hashTable/src/hashTests.cpp
 iterator
