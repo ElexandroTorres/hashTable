@@ -1,3 +1,7 @@
+/*
+ * Autoria: Elexandro Torres Tavares
+ * T.I, 2019.
+*/
 #ifndef HASHTBL_H
 #define HASHTBL_H
 

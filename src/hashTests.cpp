@@ -7,7 +7,10 @@
 #include "gtest/gtest.h"        // gtest lib
 #include "../include/hashtbl.h"   // header file for tested functions
 #include "../include/account.h"  // To get the account class
-//#include "../include/account.h"  // To get the account class
+
+// ============================================================================
+// Test Fxture
+// ============================================================================
 
 class HTTest : public ::testing::Test {
 
@@ -47,6 +50,11 @@ void HTTest::insert_accounts( void )
         ht_accounts.insert( e.getKey(), e );
 }
 
+
+// ============================================================================
+// TESTING HASH TABLE
+// ============================================================================
+
 TEST_F(HTTest, InitialState)
 {
     ASSERT_TRUE( ht_accounts.empty() );
@@ -58,18 +66,16 @@ TEST_F(HTTest, InsertingData)
     Account temp;
     size_t i(0);
     // Inserindo as contas na tabela hash.
-    
     for( auto & e : m_accounts )
     {
         ht_accounts.insert( e.getKey(), e );
         ASSERT_EQ( ++i, ht_accounts.size() );
-        std::cout << ">>> Inserindo \"" << e.m_name << "\"\n";
-        std::cout << ">>> Tabela Hash de Contas depois da insercao: \n" << ht_accounts << std::endl;
+        //std::cout << ">>> Inserindo \"" << e.m_name << "\"\n";
+        //std::cout << ">>> Tabela Hash de Contas depois da insercao: \n" << ht_accounts << std::endl;
         // Unit test for insertion
         ht_accounts.retrieve( e.getKey(), temp );
         ASSERT_EQ( temp, e );
     }
-    
 }
 
 TEST_F(HTTest, OperatorSquareBraketsRHS)
@@ -541,9 +547,8 @@ TEST_F(HTTest, Count)
     //std::cout << "The table: \n" << htable << std::endl;
 }
 
-
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
     ::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

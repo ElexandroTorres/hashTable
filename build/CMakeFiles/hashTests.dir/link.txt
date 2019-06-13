@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -g   CMakeFiles/hashTests.dir/src/hashTests.cpp.o  -o hashTests /usr/lib/x86_64-linux-gnu/libgtest.a -lpthread 

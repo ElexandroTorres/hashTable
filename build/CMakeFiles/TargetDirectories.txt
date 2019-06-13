@@ -1,3 +1,0 @@
-/home/elexandro/Documentos/hashTable/build/CMakeFiles/rebuild_cache.dir
-/home/elexandro/Documentos/hashTable/build/CMakeFiles/hashTests.dir
-/home/elexandro/Documentos/hashTable/build/CMakeFiles/edit_cache.dir
