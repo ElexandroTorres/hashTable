@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+/home/elexandro/Documentos/hashTable/include/account.h
+
 /home/elexandro/Documentos/hashTable/include/hashtbl.h
 forward_list
 -
@@ -27,4 +29,6 @@ gtest/gtest.h
 /home/elexandro/Documentos/hashTable/src/gtest/gtest.h
 ../include/hashtbl.h
 /home/elexandro/Documentos/hashTable/include/hashtbl.h
+../include/account.h
+/home/elexandro/Documentos/hashTable/include/account.h
 

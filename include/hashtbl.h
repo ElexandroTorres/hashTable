@@ -31,7 +31,7 @@ namespace ac {
 			 * Construtor padrão. Caso não informado o tamanho a tabela será iniciada com o tamanho "DEFAULT_SIZE".
 			*/
 			HashTbl(size_t tbl_size_ = DEFAULT_SIZE) {
-				m_tableSize = nextPrime(tbl_size_);
+				m_tableSize = nextPrime(tbl_size_); // Define o tamanho da tabela como sendo o primo >= a tbl_size.
 				m_data_table = new std::forward_list<Entry>[m_tableSize]; // Cria uma tabela de listas encadeadas.
 			}
 			/*!
@@ -50,16 +50,12 @@ namespace ac {
 			 * Construtor a partir de outra lista.
 			*/
 			HashTbl(std::initializer_list<Entry> ilist) {
-				
-				//auto ilistSize = ilist.size(); //verificar o proximo primo depois.
 				m_tableSize = nextPrime(ilist.size());
 				m_data_table = new std::forward_list<Entry>[m_tableSize]; // Cria uma tablea de listas encadeadas.
-				//m_count = 0;
-
+				// Inserir cada item da lista inicializadora na tabela.
 				for(auto it = ilist.begin(); it != ilist.end(); it++) {
 					insert(it->m_key, it->m_data);
 				}
-				
 			}
 			/*!
 			 * Destrutor.
@@ -67,7 +63,9 @@ namespace ac {
 			virtual ~HashTbl() {
 				delete[] m_data_table;
 			}
-
+			/*!
+			 * Operador de atribuição a partir de outra tabela.
+			*/
 			HashTbl &operator=(const HashTbl &other) {
 				//antes limpar a lista caso ela tenha elementos.
 				if(this->m_count > 0) {
@@ -84,7 +82,9 @@ namespace ac {
 
 				return *this;
 			}
-
+			/*!
+			 * Operador de atribuição a partir de uma lista inicializadora.
+			*/
 			HashTbl &operator=(std::initializer_list<Entry> ilist) {
 				if(this->m_count > 0) {
 					clear();
@@ -101,7 +101,7 @@ namespace ac {
 
 			}
 			/*!
-			 * Insere um novo elemento na tabela.
+			 * Insere um novo elemento na tabela. Caso a chave ja esteja na tabela, subistituir o valor associado a ela.
 			 * @param k_ Chave do novo elemento.
 			 * @param d_ Dado associado a chave.
 			 * @return true caso seja possivel inserir o novo elemento e false caso contrario.
@@ -113,13 +113,13 @@ namespace ac {
 				auto address(hashFunc(k_) % m_tableSize); // Calcula o endereço a qual o valor será adicionado.
 				// Varrer toda a lista para verificar se há algum item com a mesma chave.
 				for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
-					// Caso encontre algum item com a mesma chave não será possivel fazer a inserção.
+					// Caso encontre algum item com a mesma chave faz a substuição do dado associado a ela.
 					if(equalFunc(new_entry.m_key, it->m_key)) {
 						it->m_data = d_;		
 						return false;
 					}
 				}
-				//verificar o fator.
+				// Verifica o fator para caso seja necessario de uma tabela com mais espaços.
 				if((m_count/m_tableSize) > 1) {
 					rerash();
 					address = hashFunc(k_) % m_tableSize; // Calcula o endereço a qual o valor será adicionado.
@@ -135,8 +135,9 @@ namespace ac {
 
 			bool erase(const KeyType &k_) {
 				auto address(hashFunc(k_) % m_tableSize); // Calcula o endereço a qual o valor será removido.
-				// Varrer toda a lista para verificar se há algum item com a mesma chave.
+				
 				auto it = m_data_table[address].begin();
+				// Caso especial, lista vazia.
 				if(it == m_data_table[address].end()) {
 					return false;
 				}
@@ -163,9 +164,9 @@ namespace ac {
 
 			}
 			/*!
-			 * Verifica se uma chave e um dado estão associados na tabela.
+			 * Dado uma chave verifica o elemento associado a ela e o atribui a uma variavel.
 			 * @param k_ Chave para o elemento.
-			 * @param d_ Dado do elemento.
+			 * @param d_ Referencia para onde será armazenado o valor associado a chave.
 			 * @return true caso estejam associados e false caso contrario.
 			*/
 			bool retrieve(const KeyType &k_, DataType &d_) const {
@@ -175,15 +176,15 @@ namespace ac {
 					if(equalFunc(k_, it->m_key)) {
 						d_ = it->m_data;
 						return true;
-						
-						//return false;
 					}
 				}
 
 				return false;
 
 			}
-
+			/*!
+			 * Limpa a tabela, liberando o espaço de todas as listas associadas a ela.
+			*/
 			void clear(void) {
 				// Iremos limpar todas as listas. Porem a tabela ainda continuará com o mesmo tamanho.
 				for(auto i = 0u; i < m_tableSize; i++) {
@@ -221,7 +222,12 @@ namespace ac {
 				return cont;
 
 			}
-
+			/*!
+			 * Retorna uma referencia para o dado associado a chave dada. 
+			 * Caso a chave não exista na tabela, retorna uma exceção.
+			 * @param k_ Chave do elemento desejado.
+			 * @return Uma referencia para o dado associado a chave dada ou uma exceção std::out_of_range caso não exista.
+			*/
 			DataType &at(const KeyType &k_) {
 				auto address(hashFunc(k_) % m_tableSize);
 
@@ -232,8 +238,13 @@ namespace ac {
 				}
 				// Caso a chave não seja encontrada é lançada uma exceção.
 				throw std::out_of_range("Key is not in table");
-			}
-
+			}	
+			/*!
+			 * Retorna uma referencia para o dado associado a chave dada. 
+			 * Caso a chave não exista ela será adicionada na tabela.
+			 * @param k_ Chave do elemento desejado.
+			 * @return Uma referencia para o dado associado a chave dada.
+			*/
 			DataType &operator[](const KeyType &k_) {
 				auto address(hashFunc(k_) % m_tableSize);
 
@@ -248,17 +259,6 @@ namespace ac {
 				return m_data_table[address].begin()->m_data;	
 
 			}
-			/*
-			const DataType &operator[](const KeyType &k_) const {
-				auto address(hashFunc(k_) % m_tableSize);
-
-				for(auto it = m_data_table[address].begin(); it != m_data_table[address].end(); it++) {
-					if(k_ == it->m_key) {
-						return it->m_data;
-					}
-				}
-			}
-			*/
 			/*!
 			 * Sobrecarga do operador << para permitir a impressão da tabela de maneira pratica.
 			*/
@@ -286,7 +286,8 @@ namespace ac {
 			// Metodos privados: 
 
 			/*!
-			 * Aumenta o tamanho da tabela e reorganiza todos os elementos da tabela anterior.
+			 * Aumenta o tamanho da tabela e reorganiza os elementos da tabela anterior com novas posições de acordo com
+			 * a função hash.
 			*/
 			void rerash() {
 				unsigned int newTableSize = nextPrime(2*m_tableSize);
@@ -301,7 +302,8 @@ namespace ac {
 					}
 				}
 
-				delete[] m_data_table;
+				delete[] m_data_table; // Apaga a memoria associada a tabela anterior.
+
 				m_data_table = newTable;
 				m_tableSize = newTableSize;
 			}
@@ -333,7 +335,7 @@ namespace ac {
 				}
 				return number;
 			}
-	};
-}
+	}; // Fim da Classe hashTbl
+} // Fim do Namespace
 
 #endif
