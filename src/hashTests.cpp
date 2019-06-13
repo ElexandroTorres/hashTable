@@ -366,11 +366,10 @@ TEST(Hash, AtLHS2)
     for (const auto &w : { "this", "sentence", "is", "not", "a", "sentence",
                            "this", "sentence", "is", "a", "hoax"})
     {
-    	std::cout << w << std::endl;
         ++word_map[w];
         ++expected[w];
     }
-    /*
+    
     // Compare the two dictionaries
     bool entered{false};
     for (const auto &pair : expected )
@@ -380,7 +379,7 @@ TEST(Hash, AtLHS2)
         word_map.at(pair.first) *= 10;
     }
     ASSERT_TRUE( entered );
-
+    
     entered = false;
     for (const auto &pair : expected )
     {
@@ -388,7 +387,32 @@ TEST(Hash, AtLHS2)
         ASSERT_EQ( pair.second*10, word_map.at(pair.first) );
     }
     ASSERT_TRUE( entered );
-    */
+    
+}
+
+TEST(Hash, OperatorSquareBraketsLHS2)
+{
+    // count the number of occurrences of each word
+    // (the first call to operator[] initialized the counter with zero)
+    std::map<std::string, size_t> expected;
+    ac::HashTbl<std::string, size_t>  word_map;
+    for (const auto &w : { "this", "sentence", "is", "not", "a", "sentence",
+                           "this", "sentence", "is", "a", "hoax"})
+    {
+        ++word_map[w];
+        ++expected[w];
+    }
+
+    ASSERT_EQ( expected.size(), word_map.size() );
+
+    // Compare the two dictionaries
+    bool entered{false};
+    for (const auto &pair : expected )
+    {
+        entered = true;
+        ASSERT_EQ( pair.second, word_map[pair.first] );
+    }
+    ASSERT_TRUE( entered );
 }
 
 int main(int argc, char** argv) {

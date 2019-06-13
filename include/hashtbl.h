@@ -241,7 +241,11 @@ namespace ac {
 					if(equalFunc(k_, it->m_key)) {
 						return it->m_data;
 					}
-				}	
+				}
+				//Caso a chave não esteja presente.
+				insert(k_, DataType());
+
+				return m_data_table[address].begin()->m_data;	
 
 			}
 			/*
