@@ -18,11 +18,11 @@ Em seguida usamos o comando **make** para gerar o executável.
 ```
 ~/Documentos/hashTable/build$ make
 ```
-O Makefile está configurado para compilar um arquivo de testes chamado **hashTests**. Qualquer arquivo de testes deverá ter este nome ou caso contrario o CMakeLists.txt deverá ser alterado para a nova configuração desejada. O arquivo de testes deve está no diretorio **./src** na pasta do projeto. 
+O Makefile está configurado para compilar um arquivo de testes chamado **hashTests.cpp**. Qualquer arquivo de testes deverá ter este nome ou caso contrario o CMakeLists.txt deverá ser alterado para a nova configuração desejada. O arquivo de testes deve está no diretorio **./src** na pasta do projeto. 
 
 Executando os testes:
 -------------
-Para executar os testes, ou qualquer outra utilização da classe list, basta executar o comando ./hashTests.
+Para executar os testes, ou qualquer outra utilização da Hash Table, basta executar o comando ./hashTests.
 ```
 ~/Documentos/hashTable/build$ ./hashTests
 ```
